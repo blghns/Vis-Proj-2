@@ -88,9 +88,9 @@ var svg = d3.select("body").append("svg")
 
 svg.call(tip);
 
-d3.csv("pop_major_degree.csv", type, function(error, data) {
-  x.domain(data.map(function(d) { return d.Science_Occupations; }));
-  y.domain([0, d3.max(data, function(d) { return d.Total; })]);
+d3.csv("pop_major_degree.csv", type, function(error, mainBar) {
+  x.domain(mainBar.map(function(d) { return d.Science_Occupations; }));
+  y.domain([0, d3.max(mainBar, function(d) { return d.Total; })]);
 
 
   svg.append("text")      
@@ -135,7 +135,7 @@ d3.csv("pop_major_degree.csv", type, function(error, data) {
       .text("Total Employees");
 
   svg.selectAll(".bar")
-      .data(data)
+      .data(mainBar)
     .enter().append("rect")
       .attr("class", "bar")
       .attr("x", function(d) { return x(d.Science_Occupations); })
@@ -191,18 +191,24 @@ var svg = d3.select("body").append("svg")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 
-d3.tsv("femalesalary.tsv", function(error, data) {
+d3.csv("female_salary.csv", function(error, data) {
+ 
 
   // change string (from CSV) into number format
   data.forEach(function(d) {
-    if(d.Job == job.Science_Occupations){
+   if(d.Job == job.Science_Occupations){
+    console.log(job.Science_Occupations);
     d.Population = +d.Population;
     d.Salary = +d.Salary;
+
+  // console.log(d);
+  
+  }else{
+    d.Race = 0;
+    d.Population = 0;
+    d.Salary = 0;
   }
-   //console.log(d);
-  });
-
-
+});
 // don't want dots overlapping axis, so add in buffer to data domain
   xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
   yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
