@@ -21,6 +21,17 @@ body {
   fill: #ff8080 ;
 }
 
+
+.tooltip {
+  position: absolute;
+  text-align: center;
+  padding: 3px;
+  width: 153px;
+  height: 53px;
+  pointer-events: none;
+  background: white;
+}
+
 .d3-tip {
   line-height: 1;
   font-weight: bold;
@@ -79,6 +90,7 @@ var tip = d3.tip()
   .html(function(d) {
     return "<span style='color:#afdef1'>" + d.Science_Occupations + ": " + (d.Total) +"</span>";
   })
+var count = 0;
 
 var svg = d3.select("body").append("svg")
     .attr("width", width + margin.left + margin.right)
@@ -134,6 +146,7 @@ d3.csv("pop_major_degree.csv", type, function(error, mainBar) {
       .style("font-weight", "bold")
       .text("Total Employees");
 
+
   svg.selectAll(".bar")
       .data(mainBar)
     .enter().append("rect")
@@ -154,18 +167,13 @@ function type(d) {
 }
 
 function scatterplotShow(job){
+  if(count == 0){
   alert(job.Science_Occupations);
+}
 
 var margin = {top: 60, right: 220, bottom: 30, left: 40},
     width = 1100 - margin.left - margin.right,
     height = 680 - margin.top - margin.bottom;
-
-/* 
- * value accessor - returns the value to encode for a given data object.
- * scale - maps value to a visual display encoding, such as a pixel position.
- * map function - maps from data value to display value
- * axis - sets up axis
- */ 
 
 // setup x 
 var xValue = function(d) { return d.Population;}, // data -> value
@@ -181,15 +189,31 @@ var yValue = function(d) { return d.Salary;}, // data -> value
 
 // setup fill color
 var cValue = function(d) { return d.Race;},
-    color = d3.scale.category10();
+    color = d3.scale.ordinal()
+    .domain(["African American", "Asian", "Hispanic", "White", "0"])
+    .range(["#AF7AC5","#2E86C1","#FF0000","#1D8348","none"]);
 
 // add the graph canvas to the body of the webpage
-var svg = d3.select("body").append("svg")
+if(count == 0){
+var scatter = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+}
+/*else{
+  var scatter = d3.select("body") 
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
   .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+}*/
+count = 1;
+// add the tooltip area to the webpage
+var tooltip = d3.select("body").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
 
 d3.csv("female_salary.csv", function(error, data) {
  
@@ -214,15 +238,15 @@ d3.csv("female_salary.csv", function(error, data) {
   yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
 
 
-  svg.append("text")      
+  scatter.append("text")      
         .attr("x", width / 2 - 100)
         .attr("y", -30)
         .style("font-weight", "bold")
         .style("font-size", "15px")
-        .text("Marriage Evaluation by Gender and Age in 2010");
+        .text(job.Science_Occupations);
 
   // x-axis
-  svg.append("g")
+  scatter.append("g")
       .attr("class", "x axis")
       .attr("transform", "translate(0," + height + ")")
       .call(xAxis)
@@ -234,7 +258,7 @@ d3.csv("female_salary.csv", function(error, data) {
       .text("Population");
 
   // y-axis
-  svg.append("g")
+  scatter.append("g")
       .attr("class", "y axis")
       .call(yAxis)
     .append("text")
@@ -246,17 +270,53 @@ d3.csv("female_salary.csv", function(error, data) {
       .text("Salary");
 
   // draw dots
-  svg.selectAll(".dot")
+  scatter.selectAll(".dot")
       .data(data)
     .enter().append("circle")
       .attr("class", "dot")
-      .attr("r", 2.5)
+      .attr("r", 10.5)
       .attr("cx", xMap)
       .attr("cy", yMap)
-      .style("fill", function(d) {return color(cValue(d));})  
-    
+      .style("fill", function(d) {return color(cValue(d));})   
+      .on("mouseover", function(d) {
+          tooltip.transition()
+               .duration(200)
+               .style("opacity", .9);
+          tooltip.html("<span style='color:black'>" + "<strong>Race:</strong> " + cValue(d) + "<br/> " + "<strong>Poplation: </strong> " + xValue(d) + "<br/> " + "<strong>Salary: </strong> " + yValue(d) + "<br/> </span>")
+               .style("left", (d3.event.pageX + 15) + "px")
+               .style("top", (d3.event.pageY - 28) + "px");
+      })
+      .on("mouseout", function(d) {
+          tooltip.transition()
+               .duration(500)
+               .style("opacity", 0);
       });
+     
+
+  var legend = scatter.selectAll(".legend")
+      .data(color.domain())
+    .enter().append("g")
+      .attr("class", "legend")
+      .attr("transform", function(d, i) { return "translate(200," + i * 20 + ")"; });
+
+  // draw legend colored rectangles
+  legend.append("rect")
+      .attr("x", width - 18)
+      .attr("width", 18)
+      .attr("height", 18)
+      .style("fill", color);
+
+  // draw legend text
+  legend.append("text")
+      .attr("x", width - 24)
+      .attr("y", 9)
+      .attr("dy", ".35em")
+      .style("text-anchor", "end")
+      .text(function(d) { if(d == "0"){ return "NaN = Data not available";
+      }else{return d;}})
+});
 
 }
+
 
 </script>
