@@ -1,0 +1,54 @@
+body {
+    font: 10px sans-serif;
+    width:100%;
+    text-align:center;
+}
+body > svg {
+    display: inline-block;
+    vertical-align: top;
+    border:10px solid darkslategrey;
+    text-align:center;
+    border-radius: 10px;
+    box-shadow: 5px 5px 5px #888888;
+    margin:2%;
+    padding:20px;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+
+.bar {
+    fill: #990033
+}
+
+.bar:hover {
+    fill: #ff8080 ;
+}
+
+div.tooltip {
+    position: absolute;
+    text-align: center;
+    padding: 3px;
+    width: 150px;
+    height: 25px;
+    font-weight: bold;
+    font-size: 10px;
+    background: rgba(0, 0, 0, .8);
+    border-radius: 2px;
+    pointer-events: none;
+}
+
+.arc text {
+    font: 12px sans-serif;
+    font-weight: bold;
+    text-anchor: middle;
+    fill: black;
+}
+
+.arc path {
+    stroke: #fff;
+}
